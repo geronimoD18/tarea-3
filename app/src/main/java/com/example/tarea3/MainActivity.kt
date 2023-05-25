@@ -1,6 +1,7 @@
 package com.example.tarea3
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -25,7 +26,13 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        val orientation = resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setContentView(R.layout.activity_main_land)
+        } else {
+            setContentView(R.layout.activity_main)
+        }
 
         val logo = findViewById<ImageView>(R.id.logoitla)
         logo.setImageResource(R.drawable.logoitla)
@@ -37,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         val rootView = findViewById<ConstraintLayout>(R.id.rootView)
         rootView.setOnTouchListener { _, event ->
-            if (swipeEnabled) { // Verificamos si el swipe está habilitado antes de procesar el evento
+            if (swipeEnabled) {
                 gestureDetector.onTouchEvent(event)
             } else {
                 false
@@ -45,13 +52,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         textView2.setOnTouchListener { _, event ->
-            swipeEnabled = true // Habilitamos el swipe cuando se toca el textView2
+            swipeEnabled = true
             gestureDetector.onTouchEvent(event)
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return gestureDetector.onTouchEvent(event) || super.onTouchEvent(event)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val orientation = newConfig.orientation
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setContentView(R.layout.activity_main_land)
+        } else {
+            setContentView(R.layout.activity_main)
+        }
     }
 
     private inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -76,10 +94,8 @@ class MainActivity : AppCompatActivity() {
             if (Math.abs(diffX) > Math.abs(diffY)) {
                 if (Math.abs(diffX) > swipeThreshold && Math.abs(velocityX) > swipeVelocityThreshold) {
                     if (diffX > 0 && downEvent.y >= lastLinearLayoutY) {
-                        // Swipe de izquierda a derecha en el último LinearLayout (Salir de la app)
                         finish()
                     } else if (diffX < 0 && downEvent.y >= lastLinearLayoutY) {
-                        // Swipe de derecha a izquierda en el último LinearLayout (Limpiar contenido)
                         editText.text.clear()
                         textView.text = ""
                     }
@@ -89,10 +105,8 @@ class MainActivity : AppCompatActivity() {
                 if (Math.abs(diffY) > swipeThreshold && Math.abs(velocityY) > swipeVelocityThreshold) {
                     if (swipeEnabled) {
                         if (diffY < 0) {
-                            // Swipe de arriba hacia abajo (Cambiar color de fondo)
                             changeBgColor()
                         } else {
-                            // Swipe de abajo hacia arriba (Cambiar color de fondo)
                             changeBackgroundColor()
                         }
                         swipeEnabled = false
